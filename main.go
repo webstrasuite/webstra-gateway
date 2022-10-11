@@ -4,7 +4,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/webstraservices/gateway/gateway"
 	"github.com/webstraservices/gateway/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -24,4 +26,9 @@ func main() {
 	}
 
 	db.AutoMigrate(models.User{})
+
+	router := gin.Default()
+	router.Any("/*path", gateway.Gateway)
+
+	router.Run(":3000")
 }
