@@ -18,6 +18,7 @@ spec:
     spec:
       containers: 
       - image: webstradev/gatewaytemp:v1
+        imagePullPolicy: Always
         name: gateway
         readinessProbe:
           initialDelaySeconds: 5
