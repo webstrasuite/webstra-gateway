@@ -1,4 +1,4 @@
-module github.com/webstraservices/gateway-service
+module github.com/webstrasuite/gateway-service
 
 go 1.20
 

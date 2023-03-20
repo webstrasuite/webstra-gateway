@@ -1,8 +1,8 @@
 FROM golang:1.20.1
 
-ADD . /go/src/github.com/webstraservices/gateway-service
+ADD . /go/src/github.com/webstrasuite/gateway-service
 
-WORKDIR /go/src/github.com/webstraservices/gateway-service
+WORKDIR /go/src/github.com/webstrasuite/gateway-service
 
 RUN go install
 
