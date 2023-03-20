@@ -2,10 +2,7 @@ module github.com/webstraservices/gateway-service
 
 go 1.20
 
-require (
-	github.com/gin-gonic/gin v1.8.1
-	gorm.io/gorm v1.23.10
-)
+require github.com/gin-gonic/gin v1.8.1
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -27,8 +24,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-require (
-	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/jinzhu/now v1.1.5 // indirect
-	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be
-)
+require golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be // indirect
