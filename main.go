@@ -1,16 +1,11 @@
 package main
 
-import (
-	"github.com/gin-gonic/gin"
-)
+const webPort = ":3000"
 
 func main() {
-	router := gin.Default()
-	router.GET("/healthz", func(c *gin.Context) {
-		c.Writer.WriteHeader(200)
-	})
+	router := NewRouter(webPort)
 
-	router.Any("/api/*path", Gateway)
+	router.RegisterRoutes()
 
-	router.Run(":3000")
+	router.Start()
 }
