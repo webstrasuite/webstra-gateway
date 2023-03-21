@@ -25,27 +25,38 @@ func Gateway(ctx *gin.Context) {
 		return
 	}
 
-	// TODO authentication happens here and pass user object to Create ReverseProxy
-	CreateReverseProxy(serviceUrl).ServeHTTP(ctx.Writer, ctx.Request)
+	// A few steps need to happen here:
+	// -> Log the request (sending something to the logging service (probably rpc))
+	// -> Check if the user is authenticated (probably rpc)
+	// -> Check if the user is allowed to access this service (probably rpc)
+	// -> If the user is allowed to access the service, proxy the request to the service
+	//    likely will need to inject some user / permissions / role data.
 
+	// potentially a proxy is not necessary and we can make the call as specified directly.
+
+	CreateReverseProxy(serviceUrl).ServeHTTP(ctx.Writer, ctx.Request)
 }
 
 func ExtractService(path string) (string, error) {
-	// The passed path should be /api/{serviceName}/{serviceNameSpace}/*
+	// The passed path should be /api/{serviceName}/*
 	split := strings.Split(strings.TrimPrefix(path, "/"), "/")
 	if len(split) <= 1 {
 		return "", fmt.Errorf("failed to parse target service from path: %s", path)
 	}
+
+	if split[0] != "api" {
+		return "", fmt.Errorf("failed to parse target service from path: %s", path)
+	}
+
 	serviceHost := fmt.Sprintf("svc-%s", split[1])
-	serviceNameSpace := fmt.Sprintf("svc-%s", split[2])
 	if serviceHost == "" {
 		return "", fmt.Errorf("failed to parse target  from path: %s", path)
 	}
 
 	// Return the interal k8s address for the found service
 	return fmt.Sprintf(
-		"http://%s.%s:%d/api/%s",
-		serviceHost, serviceNameSpace, 10000, strings.Join(split[3:], "/"),
+		"http://%s.svc.cluster.local/%s",
+		serviceHost, strings.Join(split[2:], "/"),
 	), nil
 }
 
