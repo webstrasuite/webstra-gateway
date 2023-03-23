@@ -3,7 +3,7 @@ package main
 const webPort = ":3000"
 
 func main() {
-	router := NewRouter(webPort)
+	router := NewRouter(webPort, "webstrasuite")
 
 	router.RegisterRoutes()
 
