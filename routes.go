@@ -15,10 +15,10 @@ import (
 type Router struct {
 	router  *gin.Engine
 	server  *http.Server
-	gateway *Gateway
+	gateway Proxier
 }
 
-func NewRouter(port, serviceNamespace string) *Router {
+func NewRouter(port string, gateway Proxier) *Router {
 	// Initialise router
 	router := gin.New()
 
@@ -36,7 +36,7 @@ func NewRouter(port, serviceNamespace string) *Router {
 	return &Router{
 		server:  srv,
 		router:  router,
-		gateway: NewGateway(serviceNamespace),
+		gateway: gateway,
 	}
 }
 
@@ -47,7 +47,7 @@ func (r *Router) RegisterRoutes() {
 	})
 
 	// Route any other requests through the reverse proxy / gateway
-	r.router.Any("/api/*path", r.gateway.proxy)
+	r.router.Any("/api/*path", r.gateway.Proxy)
 }
 
 func (r *Router) Start() {

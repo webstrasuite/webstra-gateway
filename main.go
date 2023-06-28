@@ -3,7 +3,9 @@ package main
 const webPort = ":3000"
 
 func main() {
-	router := NewRouter(webPort, "webstrasuite")
+	// gateway := NewKubernetesProxy("webstrasuite")
+	gateway := NewLocalProxy()
+	router := NewRouter(webPort, gateway)
 
 	router.RegisterRoutes()
 
