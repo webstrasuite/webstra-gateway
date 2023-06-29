@@ -1,4 +1,4 @@
-package main
+package gateway
 
 import (
 	"context"
@@ -12,13 +12,13 @@ import (
 	"github.com/webstrasuite/webstra-gateway/proxy"
 )
 
-type Router struct {
+type Gateway struct {
 	listenAddr string
 	e          *echo.Echo
 	proxy      proxy.Proxier
 }
 
-func NewRouter(addr string, proxy proxy.Proxier) *Router {
+func New(addr string, proxy proxy.Proxier) *Gateway {
 	// Initialise router
 	e := echo.New()
 
@@ -34,14 +34,14 @@ func NewRouter(addr string, proxy proxy.Proxier) *Router {
 	// Register custom logger and standard recovery middleware
 	e.Use(middleware.Recover(), middleware.LoggerWithConfig(loggerConfig))
 
-	return &Router{
+	return &Gateway{
 		listenAddr: addr,
 		e:          e,
 		proxy:      proxy,
 	}
 }
 
-func (r *Router) RegisterRoutes() {
+func (r *Gateway) RegisterRoutes() {
 	// Health check endpoint for k8s liveness/readiness
 	r.e.GET("/health", func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
@@ -51,7 +51,7 @@ func (r *Router) RegisterRoutes() {
 	r.e.Any("/api/*path", r.proxy.Handle)
 }
 
-func (r *Router) Start() {
+func (r *Gateway) Start() {
 	// Start server
 	go func() {
 		if err := r.e.Start(r.listenAddr); err != nil && err != http.ErrServerClosed {
