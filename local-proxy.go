@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 type LocalProxy struct{}
@@ -35,6 +35,6 @@ func (p *LocalProxy) ExtractService(path string) (string, error) {
 	), nil
 }
 
-func (p *LocalProxy) Proxy(ctx *gin.Context) {
-	proxy(p, ctx)
+func (p *LocalProxy) Proxy(ctx echo.Context) error {
+	return proxy(p, ctx)
 }

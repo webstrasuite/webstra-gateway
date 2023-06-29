@@ -9,41 +9,46 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type Router struct {
-	router  *gin.Engine
+	router  *echo.Echo
 	server  *http.Server
 	gateway Proxier
 }
 
 func NewRouter(port string, gateway Proxier) *Router {
 	// Initialise router
-	router := gin.New()
+	e := echo.New()
 
-	// Disable logging for health check endpoint
-	logger := gin.LoggerWithConfig(gin.LoggerConfig{SkipPaths: []string{"/api/health"}})
+	// Logger config to skip logging of healthcheck calls
+	loggerConfig := middleware.LoggerConfig{
+		Skipper: func(c echo.Context) bool {
+			return c.Request().URL.Path == "/health"
+		},
+	}
 
-	// Use the logger and recovery middleware
-	router.Use(logger, gin.Recovery())
+	// Register custom logger and standard recovery middleware
+	e.Use(middleware.Recover(), middleware.LoggerWithConfig(loggerConfig))
 
 	srv := &http.Server{
 		Addr:    port,
-		Handler: router,
+		Handler: e,
 	}
 
 	return &Router{
 		server:  srv,
-		router:  router,
+		router:  e,
 		gateway: gateway,
 	}
 }
 
 func (r *Router) RegisterRoutes() {
 	// Health check endpoint for k8s liveness/readiness
-	r.router.GET("/health", func(c *gin.Context) {
-		c.Writer.WriteHeader(http.StatusOK)
+	r.router.GET("/health", func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
 	})
 
 	// Route any other requests through the reverse proxy / gateway
