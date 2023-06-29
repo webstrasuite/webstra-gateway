@@ -9,16 +9,20 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/webstrasuite/webstra-gateway/pb"
 	"github.com/webstrasuite/webstra-gateway/proxy"
+	"google.golang.org/grpc"
 )
 
 type Gateway struct {
-	listenAddr string
-	e          *echo.Echo
-	proxy      proxy.Proxier
+	listenAddr      string
+	authServiceAddr string
+	e               *echo.Echo
+	proxy           proxy.Proxier
+	authClient      pb.AuthServiceClient
 }
 
-func New(addr string, proxy proxy.Proxier) *Gateway {
+func New(addr, authServiceAddr string, proxy proxy.Proxier) (*Gateway, error) {
 	// Initialise router
 	e := echo.New()
 
@@ -34,28 +38,36 @@ func New(addr string, proxy proxy.Proxier) *Gateway {
 	// Register custom logger and standard recovery middleware
 	e.Use(middleware.Recover(), middleware.LoggerWithConfig(loggerConfig))
 
-	return &Gateway{
-		listenAddr: addr,
-		e:          e,
-		proxy:      proxy,
+	// Initialize a (gRPC) authentication service client
+	authClient, err := initAuthClient(authServiceAddr)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Gateway{
+		listenAddr:      addr,
+		authServiceAddr: authServiceAddr,
+		e:               e,
+		proxy:           proxy,
+		authClient:      authClient,
+	}, nil
 }
 
-func (r *Gateway) RegisterRoutes() {
+func (g *Gateway) RegisterRoutes() {
 	// Health check endpoint for k8s liveness/readiness
-	r.e.GET("/health", func(c echo.Context) error {
+	g.e.GET("/health", func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	})
 
 	// Route any other requests through the reverse proxy / gateway
-	r.e.Any("/api/*path", r.proxy.Handle)
+	g.e.Any("/api/*path", g.proxy.Handler(g.authClient))
 }
 
-func (r *Gateway) Start() {
+func (g *Gateway) Start() {
 	// Start server
 	go func() {
-		if err := r.e.Start(r.listenAddr); err != nil && err != http.ErrServerClosed {
-			r.e.Logger.Fatal("shutting down the server")
+		if err := g.e.Start(g.listenAddr); err != nil && err != http.ErrServerClosed {
+			g.e.Logger.Fatal("shutting down the server")
 		}
 	}()
 
@@ -66,7 +78,16 @@ func (r *Gateway) Start() {
 	<-quit
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if err := r.e.Shutdown(ctx); err != nil {
-		r.e.Logger.Fatal(err)
+	if err := g.e.Shutdown(ctx); err != nil {
+		g.e.Logger.Fatal(err)
 	}
+}
+
+func initAuthClient(addr string) (pb.AuthServiceClient, error) {
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+
+	return pb.NewAuthServiceClient(conn), nil
 }

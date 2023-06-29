@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/webstrasuite/webstra-gateway/pb"
 )
 
 type LocalProxy struct{}
@@ -35,6 +36,6 @@ func (p *LocalProxy) ExtractService(path string) (string, error) {
 	), nil
 }
 
-func (p *LocalProxy) Handle(ctx echo.Context) error {
-	return proxy(p, ctx)
+func (p *LocalProxy) Handler(authClient pb.AuthServiceClient) echo.HandlerFunc {
+	return proxy(authClient, p)
 }

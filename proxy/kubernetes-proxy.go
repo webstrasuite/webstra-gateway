@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/webstrasuite/webstra-gateway/pb"
 )
 
 type KubernetesProxy struct {
@@ -17,8 +18,8 @@ func NewKubernetes(serviceNamespace string) Proxier {
 	}
 }
 
-func (p *KubernetesProxy) Handle(ctx echo.Context) error {
-	return proxy(p, ctx)
+func (p *KubernetesProxy) Handler(authClient pb.AuthServiceClient) echo.HandlerFunc {
+	return proxy(authClient, p)
 }
 
 func (p *KubernetesProxy) ExtractService(path string) (string, error) {
