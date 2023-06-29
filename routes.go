@@ -22,6 +22,8 @@ func NewRouter(addr string, proxy proxy.Proxier) *Router {
 	// Initialise router
 	e := echo.New()
 
+	e.HideBanner = true
+
 	// Logger config to skip logging of healthcheck calls
 	loggerConfig := middleware.LoggerConfig{
 		Skipper: func(c echo.Context) bool {
