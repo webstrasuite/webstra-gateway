@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"fmt"
@@ -11,13 +11,13 @@ type KubernetesProxy struct {
 	serviceNamespace string
 }
 
-func NewKubernetesProxy(serviceNamespace string) Proxier {
+func NewKubernetes(serviceNamespace string) Proxier {
 	return &KubernetesProxy{
 		serviceNamespace: serviceNamespace,
 	}
 }
 
-func (p *KubernetesProxy) Proxy(ctx echo.Context) error {
+func (p *KubernetesProxy) Handle(ctx echo.Context) error {
 	return proxy(p, ctx)
 }
 

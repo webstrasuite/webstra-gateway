@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"log"
@@ -10,7 +10,7 @@ import (
 )
 
 type Proxier interface {
-	Proxy(echo.Context) error
+	Handle(echo.Context) error
 	ExtractService(string) (string, error)
 }
 

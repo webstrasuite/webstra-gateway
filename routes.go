@@ -11,15 +11,16 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/webstrasuite/webstra-gateway/proxy"
 )
 
 type Router struct {
-	router  *echo.Echo
-	server  *http.Server
-	gateway Proxier
+	router *echo.Echo
+	server *http.Server
+	proxy  proxy.Proxier
 }
 
-func NewRouter(port string, gateway Proxier) *Router {
+func NewRouter(port string, proxy proxy.Proxier) *Router {
 	// Initialise router
 	e := echo.New()
 
@@ -39,9 +40,9 @@ func NewRouter(port string, gateway Proxier) *Router {
 	}
 
 	return &Router{
-		server:  srv,
-		router:  e,
-		gateway: gateway,
+		server: srv,
+		router: e,
+		proxy:  proxy,
 	}
 }
 
@@ -52,7 +53,7 @@ func (r *Router) RegisterRoutes() {
 	})
 
 	// Route any other requests through the reverse proxy / gateway
-	r.router.Any("/api/*path", r.gateway.Proxy)
+	r.router.Any("/api/*path", r.proxy.Handle)
 }
 
 func (r *Router) Start() {

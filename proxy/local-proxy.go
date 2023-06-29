@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 type LocalProxy struct{}
 
-func NewLocalProxy() Proxier {
+func NewLocal() Proxier {
 	return &LocalProxy{}
 }
 
@@ -35,6 +35,6 @@ func (p *LocalProxy) ExtractService(path string) (string, error) {
 	), nil
 }
 
-func (p *LocalProxy) Proxy(ctx echo.Context) error {
+func (p *LocalProxy) Handle(ctx echo.Context) error {
 	return proxy(p, ctx)
 }
