@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -48,9 +47,7 @@ func createReverseProxy(address *url.URL) *httputil.ReverseProxy {
 		request.URL.Host = address.Host
 		request.URL.Path = address.Path
 		// Add request header(s) with information about the user like ID and Role
-
 	}
-	log.Println("hit")
 
 	// Handle Responses by logging errors or changing status codes in production with p.ModifyResponse
 	return p
