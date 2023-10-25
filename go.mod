@@ -24,5 +24,5 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	google.golang.org/grpc v1.56.1
+	google.golang.org/grpc v1.56.3
 )
